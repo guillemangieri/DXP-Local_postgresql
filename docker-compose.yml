@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    build: ./postgres
+    container_name: liferay_postgres
+    environment:
+      POSTGRES_DB: lportal
+      POSTGRES_USER: liferay
+      POSTGRES_PASSWORD: liferay
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data  # Persistência do banco
+      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf  # Configuração de autenticação
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liferay -d lportal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - liferay_network
+
+  liferay:
+    build: ./liferay
+    container_name: liferay_dxp
+    depends_on:
+      postgres:
+        condition: service_healthy  # Aguarda até o PostgreSQL estar pronto
+    volumes:
+      - ./liferay/data:/opt/liferay/data           # Dados persistentes do Liferay
+      - ./liferay/portal-ext.properties:/opt/liferay/portal-ext.properties  # Configuração
+      - ./liferay/deploy:/opt/liferay/deploy       # Chave de autenticação
+    ports:
+      - "8080:8080"
+    networks:
+      - liferay_network
+
+networks:
+  liferay_network:
+    driver: bridge

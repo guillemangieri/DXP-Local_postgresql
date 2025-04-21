@@ -1,0 +1,9 @@
+# Ignorar pastas de dados
+/liferay/data/
+/postgres/data/
+
+# Ignorar arquivos sensíveis
+/liferay/deploy/chave_liferay.xml
+
+# Opcional: Ignorar logs ou outros arquivos temporários
+*.log
